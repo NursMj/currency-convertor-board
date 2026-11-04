@@ -31,7 +31,7 @@ function evaluateLive(expression: string, convert: Convert = (value) => value, r
 }
 
 const toQuote: Convert = (value, rate) => value.times(rate);
-// const toBase: Convert = (value, rate) => value.div(rate);
+const toBase: Convert = (value, rate) => value.div(rate);
 
 const initialPairs: Pair[] = [
     {
@@ -68,6 +68,25 @@ const pairsReducer: (state: Pair[], action: Action) => Pair[] = (state: Pair[], 
                 baseSum: evaluateLive(action.value),
                 quote: evaluateLive(action.value, toQuote, rate),
                 quoteSum: evaluateLive(action.value, toQuote, rate),
+            };
+
+            updatedState[pairIndex] = updatedPair;
+            return updatedState;
+        } else {
+            return state;
+        }
+    }
+    if (action.type === "quoteChanged") {
+        const updatedState = [...state];
+        const pairIndex = updatedState.findIndex((p) => p.id === action.id);
+        if (pairIndex != -1) {
+            const rate = updatedState[pairIndex].rate;
+            const updatedPair: Pair = {
+                ...updatedState[pairIndex],
+                quote: action.value,
+                quoteSum: evaluateLive(action.value),
+                base: evaluateLive(action.value, toBase, rate),
+                baseSum: evaluateLive(action.value, toBase, rate),
             };
 
             updatedState[pairIndex] = updatedPair;
