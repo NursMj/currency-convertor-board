@@ -2,6 +2,8 @@ import { useEffect, useReducer, useState } from "react";
 import { CurrencyPair } from "../CurrencyPair/CurrencyPair";
 import { AddPairModal } from "../AddPairModal/AddPairModal";
 import { loadPairs, savePairs } from "../../storage/pairs";
+import { initialPairs, isSeedPairs } from "../../pairs/seedPairs";
+import { useLocalizedPairs } from "../../pairs/useLocalizedPairs";
 import { usePreferences } from "../../preferences/usePreferences";
 import { useRatesRefresh } from "../../rates/useRatesRefresh";
 import { RATES_REFRESH_INTERVAL_MINUTES } from "../../api/rates";
@@ -55,28 +57,10 @@ function evaluateLive(expression: string, convert: Convert = (value) => value, r
 const toQuote: Convert = (value, rate) => value.times(rate);
 const toBase: Convert = (value, rate) => value.div(rate);
 
-const initialPairs: Pair[] = [
-    {
-        id: "1",
-        baseCode: "USD",
-        quoteCode: "KGS",
-        base: "1",
-        baseSum: "1",
-        quote: "87.5",
-        quoteSum: "87.5",
-        rate: 87.5,
-    },
-    {
-        id: "2",
-        baseCode: "USD",
-        quoteCode: "SGD",
-        base: "1",
-        baseSum: "1",
-        quote: "1.28",
-        quoteSum: "1.28",
-        rate: 1.28,
-    },
-];
+function createPair(id: string, baseCode: string, quoteCode: string, rate: number): Pair {
+    const quote = evaluateLive("1", toQuote, rate);
+    return { id, baseCode, quoteCode, base: "1", baseSum: "1", quote, quoteSum: quote, rate };
+}
 
 const pairsReducer: (state: Pair[], action: Action) => Pair[] = (state: Pair[], action: Action) => {
     if (action.type === "baseChanged") {
@@ -118,9 +102,11 @@ const pairsReducer: (state: Pair[], action: Action) => Pair[] = (state: Pair[], 
         }
     }
     if (action.type === "add") {
-        const { id, baseCode, quoteCode, rate } = action;
-        const quote = evaluateLive("1", toQuote, rate);
-        return [...state, { id, baseCode, quoteCode, base: "1", baseSum: "1", quote, quoteSum: quote, rate }];
+        return [...state, createPair(action.id, action.baseCode, action.quoteCode, action.rate)];
+    }
+    if (action.type === "localized") {
+        if (!isSeedPairs(state)) return state;
+        return action.pairs.map(({ baseCode, quoteCode, rate }, i) => createPair(String(i + 1), baseCode, quoteCode, rate));
     }
     if (action.type === "remove") {
         return [...state].filter((p) => p.id !== action.id);
@@ -150,6 +136,7 @@ export const Board = () => {
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const { t, language } = usePreferences();
     const { fetchedAt, status } = useRatesRefresh(currencyPairList, dispatchCurrencyPairList);
+    useLocalizedPairs(currencyPairList, dispatchCurrencyPairList);
 
     const sensors = useSensors(
         useSensor(PointerSensor),

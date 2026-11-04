@@ -13,6 +13,7 @@ export type Action =
     | { type: "add"; id: string; baseCode: string; quoteCode: string; rate: number }
     | { type: "remove"; id: string }
     | { type: "reorder"; activeId: string; overId: string }
+    | { type: "localized"; pairs: { baseCode: string; quoteCode: string; rate: number }[] }
     | { type: "ratesUpdated"; rates: Record<string, Record<string, number>> }
     | { type: "baseChanged"; id: string; value: string }
     | { type: "quoteChanged"; id: string; value: string }
