@@ -1,3 +1,5 @@
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import { usePreferences } from "../../preferences/usePreferences";
 
 import styles from "./CurrencyPair.module.scss";
@@ -56,6 +58,8 @@ export const CurrencyPair = ({
     dispatch,
 }: CurrencyPairProps) => {
     const { t } = usePreferences();
+    const { attributes, listeners, setNodeRef, setActivatorNodeRef, transform, transition, isDragging } =
+        useSortable({ id });
 
     const handelBaseChange = (e: ChangeEvent<HTMLInputElement>) => {
         const cleanedValue = cleanInput(e.target.value);
@@ -70,7 +74,10 @@ export const CurrencyPair = ({
     };
 
     return (
-        <section className={styles.pair}>
+        <section
+            ref={setNodeRef}
+            className={`${styles.pair} ${isDragging ? styles.dragging : ""}`}
+            style={{ transform: CSS.Translate.toString(transform), transition }}>
             <div className={styles.fields}>
                 <AmountField
                     id={`${id}-base`}
@@ -99,12 +106,30 @@ export const CurrencyPair = ({
                 />
             </div>
             <div className={styles.bottom}>
-                <p className={styles.rate}>
-                    1 {baseCode} ={" "}
-                    <span className={styles.rateValue}>
-                        {rate} {quoteCode}
-                    </span>
-                </p>
+                <div className={styles.bottomStart}>
+                    <button
+                        type="button"
+                        ref={setActivatorNodeRef}
+                        className={styles.handle}
+                        aria-label={t("movePair", { pair: `${baseCode}/${quoteCode}` })}
+                        {...attributes}
+                        {...listeners}>
+                        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                            <circle cx="9" cy="6" r="1.6" />
+                            <circle cx="15" cy="6" r="1.6" />
+                            <circle cx="9" cy="12" r="1.6" />
+                            <circle cx="15" cy="12" r="1.6" />
+                            <circle cx="9" cy="18" r="1.6" />
+                            <circle cx="15" cy="18" r="1.6" />
+                        </svg>
+                    </button>
+                    <p className={styles.rate}>
+                        1 {baseCode} ={" "}
+                        <span className={styles.rateValue}>
+                            {rate} {quoteCode}
+                        </span>
+                    </p>
+                </div>
                 <button
                     type="button"
                     className={styles.delete}

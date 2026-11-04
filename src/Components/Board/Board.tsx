@@ -7,7 +7,23 @@ import { useRatesRefresh } from "../../rates/useRatesRefresh";
 import { RATES_REFRESH_INTERVAL_MINUTES } from "../../api/rates";
 import { formatMinutes } from "../../i18n/formatMinutes";
 import { create, all } from "mathjs";
+import {
+    DndContext,
+    KeyboardSensor,
+    PointerSensor,
+    closestCenter,
+    useSensor,
+    useSensors,
+} from "@dnd-kit/core";
+import {
+    SortableContext,
+    arrayMove,
+    sortableKeyboardCoordinates,
+    verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { restrictToParentElement, restrictToVerticalAxis } from "@dnd-kit/modifiers";
 
+import type { DragEndEvent } from "@dnd-kit/core";
 import type { Pair, Action } from "../../types";
 import type { BigNumber } from "mathjs";
 
@@ -109,6 +125,11 @@ const pairsReducer: (state: Pair[], action: Action) => Pair[] = (state: Pair[], 
     if (action.type === "remove") {
         return [...state].filter((p) => p.id !== action.id);
     }
+    if (action.type === "reorder") {
+        const from = state.findIndex((p) => p.id === action.activeId);
+        const to = state.findIndex((p) => p.id === action.overId);
+        return from === -1 || to === -1 || from === to ? state : arrayMove(state, from, to);
+    }
     if (action.type === "ratesUpdated") {
         let changed = false;
         const updatedState = state.map((pair) => {
@@ -129,6 +150,16 @@ export const Board = () => {
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const { t, language } = usePreferences();
     const { fetchedAt, status } = useRatesRefresh(currencyPairList, dispatchCurrencyPairList);
+
+    const sensors = useSensors(
+        useSensor(PointerSensor),
+        useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+    );
+
+    const handleDragEnd = ({ active, over }: DragEndEvent) => {
+        if (!over) return;
+        dispatchCurrencyPairList({ type: "reorder", activeId: String(active.id), overId: String(over.id) });
+    };
 
     const fetchedAtText =
         fetchedAt === null
@@ -160,9 +191,19 @@ export const Board = () => {
                 </p>
             )}
 
-            {currencyPairList.map((pair: Pair) => {
-                return <CurrencyPair key={pair.id} {...pair} dispatch={dispatchCurrencyPairList} />;
-            })}
+            <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                modifiers={[restrictToVerticalAxis, restrictToParentElement]}
+                onDragEnd={handleDragEnd}>
+                <SortableContext items={currencyPairList} strategy={verticalListSortingStrategy}>
+                    <div className={styles.pairs}>
+                        {currencyPairList.map((pair: Pair) => (
+                            <CurrencyPair key={pair.id} {...pair} dispatch={dispatchCurrencyPairList} />
+                        ))}
+                    </div>
+                </SortableContext>
+            </DndContext>
 
             <button type="button" className={styles.addButton} onClick={() => setIsAddModalOpen(true)}>
                 <span className={styles.plus} aria-hidden="true">
