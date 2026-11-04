@@ -1,0 +1,19 @@
+$breakpoint-desktop: 600px;
+
+@mixin desktop {
+    @media (min-width: $breakpoint-desktop) {
+        @content;
+    }
+}
+
+@mixin dark {
+    @at-root :root[data-theme="dark"] & {
+        @content;
+    }
+}
+
+@mixin isHoverable {
+    @media (hover: hover) {
+        @content;
+    }
+}

@@ -81,8 +81,10 @@
         border-radius: 12px;
     }
 
-    &:hover {
-        border-color: var(--accent-border);
+    @include isHoverable {
+        &:hover {
+            border-color: var(--accent-border);
+        }
     }
 
     &:focus {
