@@ -127,8 +127,16 @@
 
     width: 100%;
     padding: 8px 36px 8px 14px;
+    overflow: hidden;
+    color: transparent;
+    white-space: nowrap;
     appearance: none;
     cursor: pointer;
+
+    option {
+        color: var(--text-h);
+        background: var(--surface);
+    }
 
     &:focus {
         outline: none;
@@ -157,6 +165,7 @@
             border-radius: 12px;
             box-shadow: 0 16px 40px -12px rgba(18, 15, 26, 0.45);
             scrollbar-width: thin;
+            white-space: normal;
         }
 
         option {
@@ -182,6 +191,16 @@
     }
 }
 
+.selectValue {
+    position: absolute;
+    top: 50%;
+    left: 15px;
+    font: 500 16px/1.2 var(--mono);
+    color: var(--text-h);
+    transform: translateY(-50%);
+    pointer-events: none;
+}
+
 .chevron {
     position: absolute;
     top: 50%;
@@ -194,7 +213,7 @@
     transition: transform 0.2s;
 }
 
-.select:open + .chevron {
+.select:open ~ .chevron {
     transform: translateY(-50%) rotate(180deg);
 }
 

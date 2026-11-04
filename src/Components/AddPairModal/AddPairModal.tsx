@@ -4,10 +4,11 @@ import styles from "./AddPairModal.module.scss";
 
 import type { ChangeEvent, FormEvent, MouseEvent } from "react";
 import { RATES_REFRESH_INTERVAL_MINUTES, fetchCurrencyCodes, fetchRate } from "../../api/rates";
+import { currencyLabel } from "../../i18n/currencyName";
 import { formatMinutes } from "../../i18n/formatMinutes";
 import { usePreferences } from "../../preferences/usePreferences";
 
-import type { Dispatch } from "../../types";
+import type { Dispatch, Language } from "../../types";
 
 const FALLBACK_CODES = ["USD", "EUR", "GBP", "CHF", "JPY", "CNY", "KGS", "KZT", "RUB", "TRY", "AED", "SGD"];
 
@@ -16,10 +17,11 @@ type CurrencySelectProps = {
     label: string;
     value: string;
     codes: string[];
+    language: Language;
     onChange: (e: ChangeEvent<HTMLSelectElement>) => void;
 };
 
-const CurrencySelect = ({ id, label, value, codes, onChange }: CurrencySelectProps) => (
+const CurrencySelect = ({ id, label, value, codes, language, onChange }: CurrencySelectProps) => (
     <div className={styles.field}>
         <label htmlFor={id} className={styles.label}>
             {label}
@@ -28,10 +30,13 @@ const CurrencySelect = ({ id, label, value, codes, onChange }: CurrencySelectPro
             <select id={id} className={styles.select} value={value} onChange={onChange}>
                 {codes.map((code) => (
                     <option key={code} value={code}>
-                        {code}
+                        {currencyLabel(code, language)}
                     </option>
                 ))}
             </select>
+            <span className={styles.selectValue} aria-hidden="true">
+                {value}
+            </span>
             <svg
                 className={styles.chevron}
                 viewBox="0 0 24 24"
@@ -147,6 +152,7 @@ export const AddPairModal = ({ dispatch, onClose }: AddPairModalProps) => {
                         label={t("from")}
                         value={baseCode}
                         codes={codes}
+                        language={language}
                         onChange={(e) => setBaseCode(e.target.value)}
                     />
                     <CurrencySelect
@@ -154,6 +160,7 @@ export const AddPairModal = ({ dispatch, onClose }: AddPairModalProps) => {
                         label={t("to")}
                         value={quoteCode}
                         codes={codes}
+                        language={language}
                         onChange={(e) => setQuoteCode(e.target.value)}
                     />
                 </div>
