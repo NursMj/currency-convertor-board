@@ -38,6 +38,21 @@
     }
 }
 
+.ratesInfo {
+    --danger: #dc2626;
+
+    font-size: 13px;
+    text-align: center;
+
+    @include dark {
+        --danger: #f87171;
+    }
+}
+
+.ratesError {
+    color: var(--danger);
+}
+
 .plus {
     display: grid;
     place-items: center;

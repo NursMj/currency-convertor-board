@@ -12,6 +12,7 @@ export type Pair = {
 export type Action =
     | { type: "add"; id: string }
     | { type: "remove"; id: string }
+    | { type: "ratesUpdated"; rates: Record<string, Record<string, number>> }
     | { type: "baseChanged"; id: string; value: string }
     | { type: "quoteChanged"; id: string; value: string }
     | { type: "currencyChanged"; id: string; side: "base" | "quote"; rate: number; currency: string }

@@ -1,6 +1,9 @@
 import { useReducer } from "react";
 import { CurrencyPair } from "../CurrencyPair/CurrencyPair";
 import { usePreferences } from "../../preferences/usePreferences";
+import { useRatesRefresh } from "../../rates/useRatesRefresh";
+import { RATES_REFRESH_INTERVAL_MINUTES } from "../../api/rates";
+import { formatMinutes } from "../../i18n/formatMinutes";
 import { create, all } from "mathjs";
 
 import type { Pair, Action } from "../../types";
@@ -99,15 +102,52 @@ const pairsReducer: (state: Pair[], action: Action) => Pair[] = (state: Pair[], 
     if (action.type === "remove") {
         return [...state].filter((p) => p.id !== action.id);
     }
+    if (action.type === "ratesUpdated") {
+        let changed = false;
+        const updatedState = state.map((pair) => {
+            const rate = action.rates[pair.baseCode]?.[pair.quoteCode];
+            if (typeof rate !== "number" || !(rate > 0) || rate === pair.rate) return pair;
+
+            changed = true;
+            const quote = evaluateLive(pair.base, toQuote, rate);
+            return { ...pair, rate, quote, quoteSum: quote };
+        });
+        return changed ? updatedState : state;
+    }
     return state;
 };
 
 export const Board = () => {
     const [currencyPairList, dispatchCurrencyPairList] = useReducer(pairsReducer, initialPairs);
-    const { t } = usePreferences();
+    const { t, language } = usePreferences();
+    const { fetchedAt, status } = useRatesRefresh(currencyPairList, dispatchCurrencyPairList);
+
+    const fetchedAtText =
+        fetchedAt === null
+            ? null
+            : new Intl.DateTimeFormat(language === "ru" ? "ru-RU" : "en-US", {
+                  dateStyle: "medium",
+                  timeStyle: "short",
+              }).format(fetchedAt);
+
+    let ratesMessage = t("ratesUpdating");
+    if (status === "error") {
+        ratesMessage = fetchedAtText ? t("ratesFailedLast", { time: fetchedAtText }) : t("ratesFailed");
+    } else if (fetchedAtText) {
+        ratesMessage = t("ratesUpdated", {
+            time: fetchedAtText,
+            interval: formatMinutes(RATES_REFRESH_INTERVAL_MINUTES, language),
+        });
+    }
 
     return (
         <div className={styles.board}>
+            {currencyPairList.length > 0 && (
+                <p className={`${styles.ratesInfo} ${status === "error" ? styles.ratesError : ""}`} role="status">
+                    {ratesMessage}
+                </p>
+            )}
+
             {currencyPairList.map((pair: Pair) => {
                 return <CurrencyPair key={pair.id} {...pair} dispatch={dispatchCurrencyPairList} />;
             })}
