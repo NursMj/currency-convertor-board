@@ -1,5 +1,6 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { currencyName } from "../../i18n/currencyName";
 import { usePreferences } from "../../preferences/usePreferences";
 
 import styles from "./CurrencyPair.module.scss";
@@ -10,18 +11,20 @@ import type { ChangeEvent, CSSProperties } from "react";
 type AmountFieldProps = {
     id: string;
     label: string;
+    name: string;
     value: string;
     sum: string;
     onChange: (e: ChangeEvent<HTMLInputElement>) => void;
 };
 
-const AmountField = ({ id, label, value, sum, onChange }: AmountFieldProps) => {
+const AmountField = ({ id, label, name, value, sum, onChange }: AmountFieldProps) => {
     const showSum = value != sum;
 
     return (
         <div className={styles.field}>
             <label htmlFor={id} className={styles.label}>
                 {label}
+                {name && <span className={styles.labelName}> · {name}</span>}
             </label>
             <span className={styles.amountField} style={{ "--sum-length": sum.length } as CSSProperties}>
                 <input
@@ -57,7 +60,7 @@ export const CurrencyPair = ({
     rate,
     dispatch,
 }: CurrencyPairProps) => {
-    const { t } = usePreferences();
+    const { t, language } = usePreferences();
     const { attributes, listeners, setNodeRef, setActivatorNodeRef, transform, transition, isDragging } =
         useSortable({ id });
 
@@ -82,6 +85,7 @@ export const CurrencyPair = ({
                 <AmountField
                     id={`${id}-base`}
                     label={baseCode}
+                    name={currencyName(baseCode, language)}
                     value={base}
                     sum={baseSum}
                     onChange={handelBaseChange}
@@ -100,6 +104,7 @@ export const CurrencyPair = ({
                 <AmountField
                     id={`${id}-quote`}
                     label={quoteCode}
+                    name={currencyName(quoteCode, language)}
                     value={quote}
                     sum={quoteSum}
                     onChange={handelQuoteChange}
