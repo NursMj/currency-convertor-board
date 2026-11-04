@@ -1,5 +1,6 @@
-import { useReducer } from "react";
+import { useReducer, useState } from "react";
 import { CurrencyPair } from "../CurrencyPair/CurrencyPair";
+import { AddPairModal } from "../AddPairModal/AddPairModal";
 import { usePreferences } from "../../preferences/usePreferences";
 import { useRatesRefresh } from "../../rates/useRatesRefresh";
 import { RATES_REFRESH_INTERVAL_MINUTES } from "../../api/rates";
@@ -99,6 +100,11 @@ const pairsReducer: (state: Pair[], action: Action) => Pair[] = (state: Pair[], 
             return state;
         }
     }
+    if (action.type === "add") {
+        const { id, baseCode, quoteCode, rate } = action;
+        const quote = evaluateLive("1", toQuote, rate);
+        return [...state, { id, baseCode, quoteCode, base: "1", baseSum: "1", quote, quoteSum: quote, rate }];
+    }
     if (action.type === "remove") {
         return [...state].filter((p) => p.id !== action.id);
     }
@@ -119,6 +125,7 @@ const pairsReducer: (state: Pair[], action: Action) => Pair[] = (state: Pair[], 
 
 export const Board = () => {
     const [currencyPairList, dispatchCurrencyPairList] = useReducer(pairsReducer, initialPairs);
+    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const { t, language } = usePreferences();
     const { fetchedAt, status } = useRatesRefresh(currencyPairList, dispatchCurrencyPairList);
 
@@ -152,7 +159,7 @@ export const Board = () => {
                 return <CurrencyPair key={pair.id} {...pair} dispatch={dispatchCurrencyPairList} />;
             })}
 
-            <button type="button" className={styles.addButton}>
+            <button type="button" className={styles.addButton} onClick={() => setIsAddModalOpen(true)}>
                 <span className={styles.plus} aria-hidden="true">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
                         <path d="M12 5v14M5 12h14" />
@@ -160,6 +167,10 @@ export const Board = () => {
                 </span>
                 {t("addNewCurrency")}
             </button>
+
+            {isAddModalOpen && (
+                <AddPairModal dispatch={dispatchCurrencyPairList} onClose={() => setIsAddModalOpen(false)} />
+            )}
         </div>
     );
 };

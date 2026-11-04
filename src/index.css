@@ -91,3 +91,7 @@ code {
   background: var(--accent-bg);
   border-radius: 6px;
 }
+
+body:has(dialog[open]) {
+  overflow: hidden;
+}
