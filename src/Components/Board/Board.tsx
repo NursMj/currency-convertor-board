@@ -1,6 +1,7 @@
-import { useReducer, useState } from "react";
+import { useEffect, useReducer, useState } from "react";
 import { CurrencyPair } from "../CurrencyPair/CurrencyPair";
 import { AddPairModal } from "../AddPairModal/AddPairModal";
+import { loadPairs, savePairs } from "../../storage/pairs";
 import { usePreferences } from "../../preferences/usePreferences";
 import { useRatesRefresh } from "../../rates/useRatesRefresh";
 import { RATES_REFRESH_INTERVAL_MINUTES } from "../../api/rates";
@@ -124,7 +125,7 @@ const pairsReducer: (state: Pair[], action: Action) => Pair[] = (state: Pair[], 
 };
 
 export const Board = () => {
-    const [currencyPairList, dispatchCurrencyPairList] = useReducer(pairsReducer, initialPairs);
+    const [currencyPairList, dispatchCurrencyPairList] = useReducer(pairsReducer, initialPairs, loadPairs);
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const { t, language } = usePreferences();
     const { fetchedAt, status } = useRatesRefresh(currencyPairList, dispatchCurrencyPairList);
@@ -146,6 +147,10 @@ export const Board = () => {
             interval: formatMinutes(RATES_REFRESH_INTERVAL_MINUTES, language),
         });
     }
+
+    useEffect(() => {
+        savePairs(currencyPairList);
+    }, [currencyPairList]);
 
     return (
         <div className={styles.board}>
