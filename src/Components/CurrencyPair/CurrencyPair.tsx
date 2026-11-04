@@ -1,3 +1,5 @@
+import { usePreferences } from "../../preferences/usePreferences";
+
 import styles from "./CurrencyPair.module.scss";
 
 import type { Pair, Dispatch } from "../../types";
@@ -53,6 +55,8 @@ export const CurrencyPair = ({
     rate,
     dispatch,
 }: CurrencyPairProps) => {
+    const { t } = usePreferences();
+
     const handelBaseChange = (e: ChangeEvent<HTMLInputElement>) => {
         const cleanedValue = cleanInput(e.target.value);
         if (cleanedValue === null) return;
@@ -94,12 +98,34 @@ export const CurrencyPair = ({
                     onChange={handelQuoteChange}
                 />
             </div>
-            <p className={styles.rate}>
-                1 {baseCode} ={" "}
-                <span className={styles.rateValue}>
-                    {rate} {quoteCode}
-                </span>
-            </p>
+            <div className={styles.bottom}>
+                <p className={styles.rate}>
+                    1 {baseCode} ={" "}
+                    <span className={styles.rateValue}>
+                        {rate} {quoteCode}
+                    </span>
+                </p>
+                <button
+                    type="button"
+                    className={styles.delete}
+                    aria-label={t("deletePairNamed", { pair: `${baseCode}/${quoteCode}` })}
+                    title={t("deletePair")}
+                    onClick={() => dispatch({ type: "remove", id })}>
+                    <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.8"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        aria-hidden="true">
+                        <path d="M4 7h16" />
+                        <path d="M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
+                        <path d="M6 7l.8 11.2A2 2 0 0 0 8.8 20h6.4a2 2 0 0 0 2-1.8L18 7" />
+                        <path d="M10 11v5M14 11v5" />
+                    </svg>
+                </button>
+            </div>
         </section>
     );
 };

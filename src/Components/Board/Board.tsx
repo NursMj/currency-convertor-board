@@ -96,6 +96,9 @@ const pairsReducer: (state: Pair[], action: Action) => Pair[] = (state: Pair[], 
             return state;
         }
     }
+    if (action.type === "remove") {
+        return [...state].filter((p) => p.id !== action.id);
+    }
     return state;
 };
 
