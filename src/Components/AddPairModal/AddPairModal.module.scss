@@ -135,6 +135,51 @@
         border-color: var(--accent);
         box-shadow: 0 0 0 4px var(--accent-bg);
     }
+
+    @supports (appearance: base-select) {
+        &,
+        &::picker(select) {
+            appearance: base-select;
+        }
+
+        &::picker-icon {
+            display: none;
+        }
+
+        &::picker(select) {
+            box-sizing: border-box;
+            max-height: min(280px, 50vh);
+            margin-top: 6px;
+            padding: 6px;
+            color: var(--text-h);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            box-shadow: 0 16px 40px -12px rgba(18, 15, 26, 0.45);
+            scrollbar-width: thin;
+        }
+
+        option {
+            padding: 9px 10px;
+            border-radius: 8px;
+            cursor: pointer;
+
+            &::checkmark {
+                display: none;
+            }
+
+            &:hover,
+            &:focus-visible {
+                background: var(--accent-bg);
+                outline: none;
+            }
+
+            &:checked {
+                color: var(--accent);
+                background: var(--accent-bg);
+            }
+        }
+    }
 }
 
 .chevron {
@@ -146,6 +191,11 @@
     color: var(--text);
     transform: translateY(-50%);
     pointer-events: none;
+    transition: transform 0.2s;
+}
+
+.select:open + .chevron {
+    transform: translateY(-50%) rotate(180deg);
 }
 
 .rateBox {
