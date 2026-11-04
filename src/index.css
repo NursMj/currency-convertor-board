@@ -18,7 +18,7 @@
   --mono: ui-monospace, Consolas, monospace;
 
   font: 16px/1.5 var(--sans);
-  color-scheme: light dark;
+  color-scheme: light;
   color: var(--text);
   background: var(--bg);
   font-synthesis: none;
@@ -28,22 +28,21 @@
   -webkit-tap-highlight-color: transparent;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #0e0f14;
-    --surface: #17181f;
-    --border: #2a2c37;
-    --field-bg: #1e1f28;
-    --accent: #a78bfa;
-    --accent-bg: rgba(167, 139, 250, 0.14);
-    --accent-border: rgba(167, 139, 250, 0.45);
-    --on-accent: #0e0f14;
-    --glow: rgba(167, 139, 250, 0.14);
-    --shadow:
-      0 1px 2px rgba(0, 0, 0, 0.3), 0 12px 32px -12px rgba(0, 0, 0, 0.6);
-  }
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --text: #9ca3af;
+  --text-h: #f3f4f6;
+  --bg: #0e0f14;
+  --surface: #17181f;
+  --border: #2a2c37;
+  --field-bg: #1e1f28;
+  --accent: #a78bfa;
+  --accent-bg: rgba(167, 139, 250, 0.14);
+  --accent-border: rgba(167, 139, 250, 0.45);
+  --on-accent: #0e0f14;
+  --glow: rgba(167, 139, 250, 0.14);
+  --shadow:
+    0 1px 2px rgba(0, 0, 0, 0.3), 0 12px 32px -12px rgba(0, 0, 0, 0.6);
 }
 
 *,

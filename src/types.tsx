@@ -17,4 +17,8 @@ export type Action =
     | { type: "currencyChanged"; id: string; side: "base" | "quote"; rate: number; currency: string }
     | { type: "rateChanged"; id: string; rate: number; currency: string };
 
+export type Language = "en" | "ru";
+
+export type Theme = "light" | "dark";
+
 export type Dispatch = (action: Action) => void;

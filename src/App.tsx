@@ -1,13 +1,22 @@
 import styles from "./App.module.scss";
 import { Board } from "./Components/Board/Board";
+import { Controls } from "./Components/Controls/Controls";
+import { usePreferences } from "./preferences/usePreferences";
 
 function App() {
+    const { t } = usePreferences();
+
     return (
         <>
             <header className={styles.header}>
-                <h1 className={styles.title}>Currency board</h1>
+                <div className={styles.top}>
+                    <h1 className={styles.title}>{t("title")}</h1>
+                    <Controls />
+                </div>
                 <p className={styles.subtitle}>
-                    Type an amount or a quick sum like <code>12*1.1</code> and the other side updates as you go.
+                    {t("subtitleBefore")}
+                    <code>{t("subtitleExample")}</code>
+                    {t("subtitleAfter")}
                 </p>
             </header>
             <main>

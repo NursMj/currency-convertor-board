@@ -1,5 +1,6 @@
 import { useReducer } from "react";
 import { CurrencyPair } from "../CurrencyPair/CurrencyPair";
+import { usePreferences } from "../../preferences/usePreferences";
 import { create, all } from "mathjs";
 
 import type { Pair, Action } from "../../types";
@@ -100,6 +101,7 @@ const pairsReducer: (state: Pair[], action: Action) => Pair[] = (state: Pair[], 
 
 export const Board = () => {
     const [currencyPairList, dispatchCurrencyPairList] = useReducer(pairsReducer, initialPairs);
+    const { t } = usePreferences();
 
     return (
         <div className={styles.board}>
@@ -113,7 +115,7 @@ export const Board = () => {
                         <path d="M12 5v14M5 12h14" />
                     </svg>
                 </span>
-                Add new currency
+                {t("addNewCurrency")}
             </button>
         </div>
     );
