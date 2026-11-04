@@ -1,5 +1,7 @@
 const RATES_URL = "https://api.exchangerate-api.com/v4/latest";
 
+const CODES_BASE_CODE = "USD";
+
 export const RATES_REFRESH_INTERVAL_MINUTES = 30;
 export const RATES_REFRESH_INTERVAL_MS = RATES_REFRESH_INTERVAL_MINUTES * 60 * 1000;
 
@@ -38,6 +40,11 @@ export async function fetchRate(baseCode: string, quoteCode: string): Promise<nu
     const rate = rates[quoteCode];
     if (typeof rate !== "number") throw new Error(`No rate for ${baseCode}/${quoteCode}`);
     return rate;
+}
+
+export async function fetchCurrencyCodes(): Promise<string[]> {
+    const rates = await loadRates(CODES_BASE_CODE);
+    return Object.keys(rates).sort();
 }
 
 export type RefreshResult = {

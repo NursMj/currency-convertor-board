@@ -3,29 +3,30 @@ import { useEffect, useRef, useState } from "react";
 import styles from "./AddPairModal.module.scss";
 
 import type { ChangeEvent, FormEvent, MouseEvent } from "react";
-import { RATES_REFRESH_INTERVAL_MINUTES, fetchRate } from "../../api/rates";
+import { RATES_REFRESH_INTERVAL_MINUTES, fetchCurrencyCodes, fetchRate } from "../../api/rates";
 import { formatMinutes } from "../../i18n/formatMinutes";
 import { usePreferences } from "../../preferences/usePreferences";
 
 import type { Dispatch } from "../../types";
 
-const CURRENCY_CODES = ["USD", "EUR", "GBP", "CHF", "JPY", "CNY", "KGS", "KZT", "RUB", "TRY", "AED", "SGD"];
+const FALLBACK_CODES = ["USD", "EUR", "GBP", "CHF", "JPY", "CNY", "KGS", "KZT", "RUB", "TRY", "AED", "SGD"];
 
 type CurrencySelectProps = {
     id: string;
     label: string;
     value: string;
+    codes: string[];
     onChange: (e: ChangeEvent<HTMLSelectElement>) => void;
 };
 
-const CurrencySelect = ({ id, label, value, onChange }: CurrencySelectProps) => (
+const CurrencySelect = ({ id, label, value, codes, onChange }: CurrencySelectProps) => (
     <div className={styles.field}>
         <label htmlFor={id} className={styles.label}>
             {label}
         </label>
         <span className={styles.selectWrap}>
             <select id={id} className={styles.select} value={value} onChange={onChange}>
-                {CURRENCY_CODES.map((code) => (
+                {codes.map((code) => (
                     <option key={code} value={code}>
                         {code}
                     </option>
@@ -63,6 +64,7 @@ export const AddPairModal = ({ dispatch, onClose }: AddPairModalProps) => {
     const [baseCode, setBaseCode] = useState("USD");
     const [quoteCode, setQuoteCode] = useState("KGS");
     const [fetched, setFetched] = useState<FetchedRate | null>(null);
+    const [codes, setCodes] = useState(FALLBACK_CODES);
 
     const pairKey = `${baseCode}/${quoteCode}`;
     const sameCurrency = baseCode === quoteCode;
@@ -70,6 +72,17 @@ export const AddPairModal = ({ dispatch, onClose }: AddPairModalProps) => {
     useEffect(() => {
         const dialog = dialogRef.current;
         if (dialog && !dialog.open) dialog.showModal();
+    }, []);
+
+    useEffect(() => {
+        let isStale = false;
+        fetchCurrencyCodes()
+            .then((list) => !isStale && setCodes(list))
+            .catch(() => {});
+
+        return () => {
+            isStale = true;
+        };
     }, []);
 
     useEffect(() => {
@@ -133,12 +146,14 @@ export const AddPairModal = ({ dispatch, onClose }: AddPairModalProps) => {
                         id="add-pair-base"
                         label={t("from")}
                         value={baseCode}
+                        codes={codes}
                         onChange={(e) => setBaseCode(e.target.value)}
                     />
                     <CurrencySelect
                         id="add-pair-quote"
                         label={t("to")}
                         value={quoteCode}
+                        codes={codes}
                         onChange={(e) => setQuoteCode(e.target.value)}
                     />
                 </div>
